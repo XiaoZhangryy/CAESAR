@@ -197,7 +197,8 @@ cellembedding_image_seurat <- function(
     # Start timing the process
     tstart <- Sys.time()
 
-    X_all <- as.matrix(Seurat::GetAssayData(object = seu, slot = slot, assay = assay))
+    # X_all <- as.matrix(Seurat::GetAssayData(object = seu, slot = slot, assay = assay))
+    X_all <- as.matrix(.get_assay_data(object = seu, slot = slot, assay = assay))
 
     var.fe.tmp <- get_varfeature_fromSeurat(seu, assay = assay)
     if (is.null(var.features)) {

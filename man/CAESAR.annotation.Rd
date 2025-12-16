@@ -26,9 +26,9 @@ CAESAR.annotation(
 
 \item{marker.freq}{A matrix where rows represent cell types and columns represent marker genes. The values in the matrix represent the frequency or weight of each marker gene for each cell type. Generally, it is a list of the output of function \code{markerList2mat}.}
 
-\item{reduction.name}{A character string specifying the name of the dimensional reduction to use when calculating distances. Default is "caesar".}
+\item{reduction.name}{A character string specifying the name of the dimensional reduction to use for constructing the distance matrix when needed. Default is "caesar".}
 
-\item{assay.dist}{A character string specifying the name of the assay to store the distance matrix. If not present in the Seurat object, the function will calculate the distances using \code{ProFAST::pdistance}. Default is "distce".}
+\item{assay.dist}{A character string specifying the assay that stores the precomputed distance matrix. If the specified assay does not exist, a distance matrix will be constructed from the reduction specified by `reduction.name`. By default, the assay corresponding to `assay.dist` is assumed to have been generated from the data in `reduction.name`. To force reconstruction of the distance matrix, set `assay.dist` to a name that does not currently exist. Default is "distce".}
 
 \item{gene.use}{A character vector specifying which genes to use for the annotation. If \code{NULL}, all genes in the distance matrix will be used. Default is \code{NULL}.}
 

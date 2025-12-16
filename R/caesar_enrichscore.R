@@ -48,7 +48,10 @@ CAESAR.enrich.score <- function(
     }
 
     # Extract the distance matrix
-    distce <- Seurat::GetAssayData(
+    # distce <- Seurat::GetAssayData(
+    #     object = seu, slot = "data", assay = assay.dist
+    # )
+    distce <- .get_assay_data(
         object = seu, slot = "data", assay = assay.dist
     )
 

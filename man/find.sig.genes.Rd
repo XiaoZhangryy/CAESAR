@@ -6,6 +6,7 @@
 \usage{
 find.sig.genes(
   seu,
+  reduction.name = "caesar",
   distce.assay = "distce",
   ident = NULL,
   expr.prop.cutoff = 0.1,
@@ -16,7 +17,9 @@ find.sig.genes(
 \arguments{
 \item{seu}{A Seurat object containing gene expression data.}
 
-\item{distce.assay}{A character string specifying the assay that contains the distance matrix or distance-related data. Default is "distce".}
+\item{reduction.name}{A character string specifying the name of the dimensional reduction to use for constructing the distance matrix when needed. Default is "caesar".}
+
+\item{distce.assay}{A character string specifying the assay that stores the precomputed distance matrix. If the specified assay does not exist, a distance matrix will be constructed from the reduction specified by `reduction.name`. By default, the assay corresponding to `distce.assay` is assumed to have been generated from the data in `reduction.name`. To force reconstruction of the distance matrix, set `distce.assay` to a name that does not currently exist. Default is "distce".}
 
 \item{ident}{A character string specifying the column name in the `meta.data` slot of the Seurat object used to define the identities (clusters or cell groups). If `NULL`, the default identities (`Idents(seu)`) will be used. Default is `NULL`.}
 

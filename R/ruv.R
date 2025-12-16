@@ -207,8 +207,11 @@ CAESAR.RUV <- function(seuList, distList, verbose = FALSE, species = "human", cu
 
     # Extract and transpose the assay data for each Seurat object
     XList <- lapply(
+        # seq_along(defAssay_vec), function(r) {
+        #     Matrix::t(Seurat::GetAssayData(seuList[[r]], assay = defAssay_vec[r], slot = "data"))
+        # }
         seq_along(defAssay_vec), function(r) {
-            Matrix::t(Seurat::GetAssayData(seuList[[r]], assay = defAssay_vec[r], slot = "data"))
+            Matrix::t(.get_assay_data(seuList[[r]], assay = defAssay_vec[r], slot = "data"))
         }
     )
 

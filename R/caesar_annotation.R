@@ -4,7 +4,8 @@
 #' This function identifies signature genes for each cell type or cell group in a Seurat object using a co-embedding distance-based approach. It computes the average expression and distance metrics for each gene across different groups, while also considering expression proportions.
 #'
 #' @param seu A Seurat object containing gene expression data.
-#' @param distce.assay A character string specifying the assay that contains the distance matrix or distance-related data. Default is "distce".
+#' @param reduction.name A character string specifying the name of the dimensional reduction to use for constructing the distance matrix when needed. Default is "caesar".
+#' @param distce.assay A character string specifying the assay that stores the precomputed distance matrix. If the specified assay does not exist, a distance matrix will be constructed from the reduction specified by `reduction.name`. By default, the assay corresponding to `distce.assay` is assumed to have been generated from the data in `reduction.name`. To force reconstruction of the distance matrix, set `distce.assay` to a name that does not currently exist. Default is "distce".
 #' @param ident A character string specifying the column name in the `meta.data` slot of the Seurat object used to define the identities (clusters or cell groups). If `NULL`, the default identities (`Idents(seu)`) will be used. Default is `NULL`.
 #' @param expr.prop.cutoff A numeric value specifying the minimum proportion of cells that must express a gene for it to be considered. Default is 0.1.
 #' @param assay A character string specifying the assay to use for expression data. If `NULL`, the default assay of the Seurat object will be used. Default is `NULL`.
@@ -35,7 +36,7 @@
 #' @importFrom Matrix rowMeans rowSums
 #' @export
 find.sig.genes <- function(
-    seu, distce.assay = "distce", ident = NULL, expr.prop.cutoff = 0.1,
+    seu, reduction.name = "caesar", distce.assay = "distce", ident = NULL, expr.prop.cutoff = 0.1,
     assay = NULL, genes.use = NULL) {
     if (is.null(ident)) {
         cell_label_vec <- Seurat::Idents(seu)
@@ -50,6 +51,13 @@ find.sig.genes <- function(
         assay <- Seurat::DefaultAssay(seu)
     }
 
+    if (!(distce.assay %in% Seurat::Assays(seu))) {
+        seu <- ProFAST::pdistance(
+            seu,
+            reduction = reduction.name, assay.name = distce.assay
+        )
+    }
+
     if (is.null(genes.use)) {
         genes.use <- rownames(seu@assays[[distce.assay]])
     }
@@ -58,8 +66,10 @@ find.sig.genes <- function(
     cell_ID <- sort(as.character(unique(cell_label_vec)))
 
     # Extract distance and expression data
-    distce <- Seurat::GetAssayData(seu, assay = distce.assay, slot = "data")[genes.use, ]
-    exp_data <- Seurat::GetAssayData(seu, assay = assay, slot = "data")
+    # distce <- Seurat::GetAssayData(seu, assay = distce.assay, slot = "data")[genes.use, ]
+    # exp_data <- Seurat::GetAssayData(seu, assay = assay, slot = "data")
+    distce <- .get_assay_data(seu, assay = distce.assay, slot = "data")[genes.use, ]
+    exp_data <- .get_assay_data(seu, assay = assay, slot = "data")
     expr.all <- Matrix::rowSums(
         exp_data[genes.use, , drop = FALSE] > 0
     )
@@ -401,8 +411,8 @@ annotation_mat <- function(
 #'
 #' @param seu A Seurat object containing cell expression data.
 #' @param marker.freq A matrix where rows represent cell types and columns represent marker genes. The values in the matrix represent the frequency or weight of each marker gene for each cell type. Generally, it is a list of the output of function \code{markerList2mat}.
-#' @param reduction.name A character string specifying the name of the dimensional reduction to use when calculating distances. Default is "caesar".
-#' @param assay.dist A character string specifying the name of the assay to store the distance matrix. If not present in the Seurat object, the function will calculate the distances using \code{ProFAST::pdistance}. Default is "distce".
+#' @param reduction.name A character string specifying the name of the dimensional reduction to use for constructing the distance matrix when needed. Default is "caesar".
+#' @param assay.dist A character string specifying the assay that stores the precomputed distance matrix. If the specified assay does not exist, a distance matrix will be constructed from the reduction specified by `reduction.name`. By default, the assay corresponding to `assay.dist` is assumed to have been generated from the data in `reduction.name`. To force reconstruction of the distance matrix, set `assay.dist` to a name that does not currently exist. Default is "distce".
 #' @param gene.use A character vector specifying which genes to use for the annotation. If \code{NULL}, all genes in the distance matrix will be used. Default is \code{NULL}.
 #' @param cal.confidence Logical, indicating whether to calculate the confidence of the predictions. Default is \code{TRUE}.
 #' @param cal.proportions Logical, indicating whether to calculate the mixing proportions of cell types for each cell. Default is \code{TRUE}.
@@ -506,7 +516,10 @@ CAESAR.annotation <- function(
     }
 
     # Extract the distance matrix from the Seurat object
-    distce <- Seurat::GetAssayData(
+    # distce <- Seurat::GetAssayData(
+    #     object = seu, slot = "data", assay = assay.dist
+    # )
+    distce <- .get_assay_data(
         object = seu, slot = "data", assay = assay.dist
     )
 

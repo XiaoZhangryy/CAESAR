@@ -6,7 +6,7 @@
 \usage{
 CAESAR.coembedding(
   seu,
-  pos,
+  pos = NULL,
   reduction.name = "caesar",
   q = 50,
   radius.upper = 400,
@@ -16,7 +16,7 @@ CAESAR.coembedding(
 \arguments{
 \item{seu}{A Seurat object containing spatial transcriptomics data.}
 
-\item{pos}{A matrix of spatial coordinates for the spots (e.g., spatial positions of cells or pixels in the image). The row names of `pos` should match the column names of `seu`.}
+\item{pos}{A matrix of spatial coordinates for the spots (e.g., spatial positions of cells or pixels in the image). The row names of `pos` should match the column names of `seu`. When pos is NULL, we use a non-centered linear factor model to construct the co-embedding.}
 
 \item{reduction.name}{A character string specifying the name of the dimensional reduction method to store in the Seurat object. Default is "caesar".}
 
@@ -30,7 +30,7 @@ CAESAR.coembedding(
 The modified Seurat object with the computed cell and gene embeddings stored in the specified reduction slot.
 }
 \description{
-This function performs co-embedding of both cells and genes using the CAESAR method. It integrates spatial transcriptomics data from a Seurat object (`seu`) with a spatial adjacency matrix to compute the low-dimensional co-embedding.
+This function performs co-embedding of both cells and genes using the CAESAR method. It integrates spatial transcriptomics data from a Seurat object (`seu`) with a spatial adjacency matrix to compute the low-dimensional co-embedding. When spatial location information is not provided, we use a non-centered linear factor model to construct the co-embedding.
 }
 \examples{
 data(toydata)

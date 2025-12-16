@@ -49,9 +49,11 @@ add.gene.embedding <- function(
         stop("Input 'adjm' must be a sparse matrix.")
     }
 
-    X_data <- as.matrix(Seurat::GetAssayData(
-        object = seu, slot = "data", assay = assay
-    ))
+    # X_data <- as.matrix(Seurat::GetAssayData(
+    #     object = seu, slot = "data", assay = assay
+    # ))
+
+    X_data <- as.matrix(.get_assay_data(seu, assay = assay, slot = "data"))
 
     cellsCoordinates <- Seurat::Embeddings(seu, reduction.name)
     featuresCoordinates <- gene_embed_weight_cpp(as.matrix(X_data), cellsCoordinates, adjm)
@@ -102,7 +104,7 @@ add.gene.embedding <- function(
 #' pos <- toydata$pos
 #' 
 #' adjm <- ProFAST::AddAdj(as.matrix(pos), radius.upper = 200)
-#' X <- Seurat::GetAssayData(object = seu, slot = "data", assay = "RNA")
+#' X <- CAESAR.Suite:::.get_assay_data(object = seu, slot = "data", assay = "RNA")
 #' cellembedding <- cellembedding_matrix(
 #'     X = X,
 #'     adjm = adjm
@@ -179,7 +181,9 @@ cellembedding_seurat <- function(
     # Start timing the process
     tstart <- Sys.time()
 
-    X_all <- Seurat::GetAssayData(object = seu, slot = slot, assay = assay)
+    # X_all <- Seurat::GetAssayData(object = seu, slot = slot, assay = assay)
+
+    X_all <- .get_assay_data(object = seu, slot = slot, assay = assay)
 
     var.fe.tmp <- get_varfeature_fromSeurat(seu, assay = assay)
     if (is.null(var.features)) {
@@ -215,10 +219,10 @@ cellembedding_seurat <- function(
 #' Compute Co-embedding Using CAESAR
 #'
 #' @description
-#' This function performs co-embedding of both cells and genes using the CAESAR method. It integrates spatial transcriptomics data from a Seurat object (`seu`) with a spatial adjacency matrix to compute the low-dimensional co-embedding.
+#' This function performs co-embedding of both cells and genes using the CAESAR method. It integrates spatial transcriptomics data from a Seurat object (`seu`) with a spatial adjacency matrix to compute the low-dimensional co-embedding. When spatial location information is not provided, we use a non-centered linear factor model to construct the co-embedding.
 #'
 #' @param seu A Seurat object containing spatial transcriptomics data.
-#' @param pos A matrix of spatial coordinates for the spots (e.g., spatial positions of cells or pixels in the image). The row names of `pos` should match the column names of `seu`.
+#' @param pos A matrix of spatial coordinates for the spots (e.g., spatial positions of cells or pixels in the image). The row names of `pos` should match the column names of `seu`. When pos is NULL, we use a non-centered linear factor model to construct the co-embedding.
 #' @param reduction.name A character string specifying the name of the dimensional reduction method to store in the Seurat object. Default is "caesar".
 #' @param q An integer specifying the number of dimensions for the reduced co-embeddings. Default is 50.
 #' @param radius.upper A numeric value specifying the upper limit of the search radius for the spatial adjacency matrix. Default is 400.
@@ -231,7 +235,7 @@ cellembedding_seurat <- function(
 #' \code{\link{add.gene.embedding}} for adding gene embeddings to a Seurat object.
 #'
 #' @importFrom stats dist median
-#' @importFrom ProFAST AddAdj
+#' @importFrom ProFAST AddAdj NCFM
 #' @export
 #' 
 #' @examples 
@@ -246,9 +250,19 @@ cellembedding_seurat <- function(
 #' )
 #' print(seu)
 CAESAR.coembedding <- function(
-    seu, pos, reduction.name = "caesar", q = 50, radius.upper = 400, ...) {
+    seu, pos = NULL, reduction.name = "caesar", q = 50, radius.upper = 400, ...) {
     if (!inherits(seu, "Seurat")) {
         stop("Input 'seu' must be a Seurat object.")
+    }
+
+    if (!is.numeric(q) || q <= 0 || q %% 1 != 0) {
+        stop("'q' must be a positive integer value.")
+    }
+
+    if (is.null(pos)) {
+        message("Spatial location information is not provided, non-centered linear factor model is used to construct the co-embedding.")
+        seu <- ProFAST::NCFM(seu, q = q, reduction.name = reduction.name, ...)
+        return(seu)
     }
 
     if (!is.matrix(pos) && !is.data.frame(pos)) {
@@ -257,10 +271,6 @@ CAESAR.coembedding <- function(
 
     if (!all(rownames(pos) %in% colnames(seu))) {
         stop("Row names of 'pos' must match the column names of 'seu'.")
-    }
-
-    if (!is.numeric(q) || q <= 0 || q %% 1 != 0) {
-        stop("'q' must be a positive integer value.")
     }
 
     if (!is.numeric(radius.upper) || radius.upper <= 0) {

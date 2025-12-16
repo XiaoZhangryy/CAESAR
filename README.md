@@ -87,7 +87,7 @@ if (!require("BiocManager", quietly = TRUE))
 # install the package on Bioconducter
 BiocManager::install(c("scater"))
 ```
-If  dependent packages (such as `ProFAST`) not normally installed are in CRAN, then use the following command to install the dependent packages.
+If dependent packages (such as `ProFAST`) not normally installed are in CRAN, then use the following command to install the dependent packages.
 ```{Linux}
 # install the package on CRAN
 install.packages("ProFAST")
@@ -98,6 +98,8 @@ install.packages("ProFAST")
 For an example of typical CAESAR.Suite usage, please see our [Package Website](https://XiaoZhangryy.github.io/CAESAR.Suite/index.html) for a demonstration and overview of the functions included in CAESAR.Suite.
 
 # NEWs
+* CAESAR.Suite version 0.3.0 (2025-12-16) Updated to support SeuratObject 5.0.0.
+* CAESAR.Suite version 0.2 (2025-03-02)
 * CAESAR.Suite version 0.1 (2024-09-06)
 
 

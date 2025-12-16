@@ -9,13 +9,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-    eval = requireNamespace("ProFAST", quietly = TRUE),
-    collapse = TRUE,
-    comment = "#>"
-)
-```
 
 This vignette introduces the CAESAR.Suite workflow for the analysis of Xenium BC spatial transcriptomics dataset. In this vignette, the workflow of CAESAR.Suite consists of five steps
 
@@ -26,12 +19,11 @@ This vignette introduces the CAESAR.Suite workflow for the analysis of Xenium BC
 * Downstream analysis (i.e. , signature gene analysis, visualization of cell types and coembeddings)
 
 ## Load and quality control both reference and target data
-We demonstrate the application of CAESAR.Suite to Xenium data. In this vignette, the input data includes: `BC_scRNAList` — two scRNA-seq reference datasets, each with 3,000 cells; `BC_XeniumList` — two Xenium target datasets, each with 3,000 cells; and `BC_feature_imgList` — two feature matrices containing histology image information from the Xenium target datasets. For more details with respect to histology image feature extraction, see [vignette](https://xiaozhangryy.github.io/CAESAR.Suite/articles/XeniumBCEIF.html). The genes of scRNA-seq reference datasets and Xenium target datasets are aligned. The package can be loaded with the command:
+We demonstrate the application of CAESAR.Suite to Xenium data. In this vignette, the input data includes: `BC_scRNAList` — two scRNA-seq reference datasets, each with 3,000 cells; `BC_XeniumList` — two Xenium target datasets, each with 3,000 cells; and `BC_feature_imgList` — two feature matrices containing histology image information from the Xenium target datasets. For more details with respect to histology image feature extraction, see [vignette](https://xiaozhangryy.github.io/CAESAR.Suite/articles/XeniumBCEIF.html). The genes shared between the scRNA-seq reference and Xenium target datasets were used for analysis. The package can be loaded with the command:
 ```{r}
 set.seed(1) # set a random seed for reproducibility.
 library(CAESAR.Suite) # load the package of CAESAR.Suite method
 library(Seurat)
-library(ProFAST)
 library(ggplot2)
 library(msigdbr)
 library(dplyr)
@@ -61,7 +53,7 @@ load(BC_feature_imgList_file)
 print(sapply(BC_feature_imgList, dim))
 ```
 
-Users can perform appropriate quality control on the reference dataset and target datasets. Genes expressed in less than one cell are required to remove to avoid unknown errors. Other quality control steps can be set by the user according to the data quality. Here, since scRNA-seq reference datasets and Xenium target datasets had been aligned, we do not perform quality control.
+Users can perform appropriate quality control on the reference dataset and target datasets. Genes expressed in fewer than one cell were removed. Other quality control steps can be set by the user according to the data quality. Here, since the scRNA-seq reference and Xenium target datasets were already matched by their shared genes, no additional quality control was performed.
 ```{r}
 # BC_scRNAList <- lapply(BC_scRNAList,  function(seu) {
 #     CreateSeuratObject(
@@ -91,10 +83,10 @@ Users can perform appropriate quality control on the reference dataset and targe
 # })
 ```
 
-## Preprocessing and align reference and target data
-First, we normalize the data and select the variable genes. We align genes and variable genes of reference and target data.
+## Preprocessing and match reference and target data
+First, we normalize the data and select the variable genes. We matched the genes and variable genes between the reference and target datasets.
 ```{r}
-# align genes
+# match genes
 common_genes <- Reduce(intersect, c(
     lapply(BC_scRNAList, rownames),
     lapply(BC_XeniumList, rownames)
@@ -124,20 +116,17 @@ print(BC_XeniumList)
 ## Detect signature genes for each cell type using scRNA-seq reference data
 We introduce how to use CAESAR to detect signature genes form scRNA-seq reference data. First, we calculate the co-embeddings.
 ```{r}
-BC_scRNAList <- lapply(BC_scRNAList, ProFAST::NCFM, q = 50)
+BC_scRNAList <- lapply(BC_scRNAList, CAESAR.coembedding, q = 50)
 ```
 
 Then, we detect signature genes.
 ```{r}
-# calculate cell-gene distance
-BC_scRNAList <- lapply(BC_scRNAList, ProFAST::pdistance, reduction = "ncfm")
-
-# identify signature genes
+# calculate cell-gene distance and identify signature genes
 sg_sc_List <- lapply(BC_scRNAList, function(seu) {
     print(table(seu$CellType))
 
     Idents(seu) <- seu$CellType
-    find.sig.genes(seu)
+    find.sig.genes(seu, reduction.name = "caesar")
 })
 
 str(sg_sc_List)
