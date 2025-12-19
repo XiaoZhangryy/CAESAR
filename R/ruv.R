@@ -207,11 +207,8 @@ CAESAR.RUV <- function(seuList, distList, verbose = FALSE, species = "human", cu
 
     # Extract and transpose the assay data for each Seurat object
     XList <- lapply(
-        # seq_along(defAssay_vec), function(r) {
-        #     Matrix::t(Seurat::GetAssayData(seuList[[r]], assay = defAssay_vec[r], slot = "data"))
-        # }
         seq_along(defAssay_vec), function(r) {
-            Matrix::t(.get_assay_data(seuList[[r]], assay = defAssay_vec[r], slot = "data"))
+            Matrix::t(Seurat::GetAssayData(seuList[[r]], assay = defAssay_vec[r], slot = "data"))
         }
     )
 
@@ -300,7 +297,7 @@ CAESAR.RUV <- function(seuList, distList, verbose = FALSE, species = "human", cu
 
     # Add corrected data to the Seurat object
     if (inherits(seuInt[["CAESAR"]], "Assay5")) {
-        seuInt <- Seurat::SetAssayData(object = seuInt, slot = "data", assay = "CAESAR", new.data = t(hX))
+        seuInt <- Seurat::SetAssayData(object = seuInt, layer = "data", assay = "CAESAR", new.data = t(hX))
     } else {
         seuInt[["CAESAR"]]@data <- t(hX)
     }

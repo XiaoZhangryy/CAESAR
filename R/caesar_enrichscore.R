@@ -48,11 +48,8 @@ CAESAR.enrich.score <- function(
     }
 
     # Extract the distance matrix
-    # distce <- Seurat::GetAssayData(
-    #     object = seu, slot = "data", assay = assay.dist
-    # )
-    distce <- .get_assay_data(
-        object = seu, slot = "data", assay = assay.dist
+    distce <- Seurat::GetAssayData(
+        object = seu, layer = "data", assay = assay.dist
     )
 
     # Use the specified genes or all genes in the distance matrix

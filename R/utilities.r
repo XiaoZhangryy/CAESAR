@@ -40,17 +40,6 @@ is_interactive <- function() {
     return(invisible(0))
 }
 
-.get_assay_data <- function(object, assay = NULL, slot = c("data", "counts", "scale.data")) {
-  slot <- match.arg(slot)
-
-  # SeuratObject v5
-  if ("layer" %in% names(formals(Seurat::GetAssayData))) {
-    return(Seurat::GetAssayData(object = object, assay = assay, layer = slot))
-  }
-
-  Seurat::GetAssayData(object = object, assay = assay, slot = slot)
-}
-
 
 firstup <- function(x) {
     x <- tolower(x)

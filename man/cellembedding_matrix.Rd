@@ -30,7 +30,7 @@ seu <- toydata$seu
 pos <- toydata$pos
 
 adjm <- ProFAST::AddAdj(as.matrix(pos), radius.upper = 200)
-X <- CAESAR.Suite:::.get_assay_data(object = seu, slot = "data", assay = "RNA")
+X <- Seurat::GetAssayData(object = seu, layer = "data", assay = "RNA")
 cellembedding <- cellembedding_matrix(
     X = X,
     adjm = adjm

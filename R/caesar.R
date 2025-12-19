@@ -49,11 +49,9 @@ add.gene.embedding <- function(
         stop("Input 'adjm' must be a sparse matrix.")
     }
 
-    # X_data <- as.matrix(Seurat::GetAssayData(
-    #     object = seu, slot = "data", assay = assay
-    # ))
-
-    X_data <- as.matrix(.get_assay_data(seu, assay = assay, slot = "data"))
+    X_data <- as.matrix(Seurat::GetAssayData(
+        object = seu, layer = "data", assay = assay
+    ))
 
     cellsCoordinates <- Seurat::Embeddings(seu, reduction.name)
     featuresCoordinates <- gene_embed_weight_cpp(as.matrix(X_data), cellsCoordinates, adjm)
@@ -104,7 +102,7 @@ add.gene.embedding <- function(
 #' pos <- toydata$pos
 #' 
 #' adjm <- ProFAST::AddAdj(as.matrix(pos), radius.upper = 200)
-#' X <- CAESAR.Suite:::.get_assay_data(object = seu, slot = "data", assay = "RNA")
+#' X <- Seurat::GetAssayData(object = seu, layer = "data", assay = "RNA")
 #' cellembedding <- cellembedding_matrix(
 #'     X = X,
 #'     adjm = adjm
@@ -181,9 +179,7 @@ cellembedding_seurat <- function(
     # Start timing the process
     tstart <- Sys.time()
 
-    # X_all <- Seurat::GetAssayData(object = seu, slot = slot, assay = assay)
-
-    X_all <- .get_assay_data(object = seu, slot = slot, assay = assay)
+    X_all <- Seurat::GetAssayData(object = seu, layer = slot, assay = assay)
 
     var.fe.tmp <- get_varfeature_fromSeurat(seu, assay = assay)
     if (is.null(var.features)) {

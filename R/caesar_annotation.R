@@ -66,10 +66,8 @@ find.sig.genes <- function(
     cell_ID <- sort(as.character(unique(cell_label_vec)))
 
     # Extract distance and expression data
-    # distce <- Seurat::GetAssayData(seu, assay = distce.assay, slot = "data")[genes.use, ]
-    # exp_data <- Seurat::GetAssayData(seu, assay = assay, slot = "data")
-    distce <- .get_assay_data(seu, assay = distce.assay, slot = "data")[genes.use, ]
-    exp_data <- .get_assay_data(seu, assay = assay, slot = "data")
+    distce <- Seurat::GetAssayData(seu, assay = distce.assay, layer = "data")[genes.use, ]
+    exp_data <- Seurat::GetAssayData(seu, assay = assay, layer = "data")
     expr.all <- Matrix::rowSums(
         exp_data[genes.use, , drop = FALSE] > 0
     )
@@ -516,11 +514,8 @@ CAESAR.annotation <- function(
     }
 
     # Extract the distance matrix from the Seurat object
-    # distce <- Seurat::GetAssayData(
-    #     object = seu, slot = "data", assay = assay.dist
-    # )
-    distce <- .get_assay_data(
-        object = seu, slot = "data", assay = assay.dist
+    distce <- Seurat::GetAssayData(
+        object = seu, layer = "data", assay = assay.dist
     )
 
     # Run the annotation process using the distance matrix and marker frequencies
